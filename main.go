@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"microservice/handlers"
+	"microservice/product-api/handlers"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,11 +13,9 @@ import (
 
 func main() {
 	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
-	hh := handlers.NewHelloHandler(logger)
-	gh := handlers.NewGoodbyeHandler(logger)
+	productHandler := handlers.NewProductsHandler(logger)
 	sm := http.NewServeMux()
-	sm.Handle("/", hh)
-	sm.Handle("/goodbye", gh)
+	sm.Handle("/", productHandler)
 
 	s := &http.Server{
 		Addr:         ":8080",
