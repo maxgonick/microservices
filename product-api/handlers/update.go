@@ -8,6 +8,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// @Summary Updates a product
+// @Description Updates an existing product in the list
+// @Param id path int true "Product ID"
+// @Param product body data.Product true "Product data to update"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 404 {string} string "Product not found"
+// @Failure 500 {string} string "Internal Server Error"
+// @Success 200
+// @Router /{id} [put]
 func (p *ProductsHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle PUT Request")
 

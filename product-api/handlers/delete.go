@@ -8,6 +8,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// @Summary Deletes a product
+// @Description Deletes a product from the list by its ID
+// @Param id path int true "Product ID"
+// @Failure 400 {string} string "Bad Request - Invalid ID"
+// @Success 200
+// @Router /{id} [delete]
 func (p *ProductsHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle DELETE Request")
 

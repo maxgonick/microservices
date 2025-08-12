@@ -7,8 +7,9 @@ import (
 )
 
 // @Summary Adds a product
-// @Param product body data.Product true "product"
-// @Failure 500 {string} string "Internal Server Error"
+// @Description Adds a new product to the list
+// @Param product body data.Product true "Product to add"
+// @Failure 400 {string} string "Bad Request"
 // @Success 200 {string} string "Successfully added product"
 // @Router / [post]
 func (p *ProductsHandler) AddProduct(w http.ResponseWriter, r *http.Request) {

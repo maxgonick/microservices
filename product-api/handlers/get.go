@@ -9,6 +9,7 @@ import _ "product-api/docs"
 
 
 // @Summary Lists all products
+// @Description Returns a list of all products
 // @Failure 500 {string} string "Internal Server Error"
 // @Success 200 {object} productsResponse "List of all products"
 // @Router / [get]
