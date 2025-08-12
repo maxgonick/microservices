@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -9,9 +10,16 @@ import (
 	"product-api/handlers"
 	"syscall"
 	"time"
-
-	"github.com/gorilla/mux"
+	"github.com/swaggo/http-swagger"
 )
+import _ "product-api/docs"
+
+//	@title			Product API
+//	@version		1.0
+//	@description	This is a basic CRUD product web server.
+
+//	@host		localhost:8080
+//	@BasePath	/
 
 func main() {
 
@@ -31,6 +39,9 @@ func main() {
 
 	postRouter := router.Methods("POST").Subrouter()
 	postRouter.HandleFunc("/", productHandler.AddProduct)
+
+	router.PathPrefix("/swagger").HandlerFunc(httpSwagger.WrapHandler)
+
 
 	s := &http.Server{
 		Addr:         ":8080",

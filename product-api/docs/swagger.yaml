@@ -1,0 +1,65 @@
+basePath: /
+definitions:
+  data.Product:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      sku:
+        type: string
+    required:
+    - name
+    - price
+    - sku
+    type: object
+  handlers.productsResponse:
+    properties:
+      body:
+        description: All products in the system
+        items:
+          $ref: '#/definitions/data.Product'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a basic CRUD product web server.
+  title: Product API
+  version: "1.0"
+paths:
+  /:
+    get:
+      responses:
+        "200":
+          description: List of all products
+          schema:
+            $ref: '#/definitions/handlers.productsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Lists all products
+    post:
+      parameters:
+      - description: product
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/data.Product'
+      responses:
+        "200":
+          description: Successfully added product
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Adds a product
+swagger: "2.0"
