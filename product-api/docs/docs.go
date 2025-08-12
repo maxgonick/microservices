@@ -17,6 +17,7 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
+                "description": "Returns a list of all products",
                 "summary": "Lists all products",
                 "responses": {
                     "200": {
@@ -34,10 +35,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "description": "Adds a new product to the list",
                 "summary": "Adds a product",
                 "parameters": [
                     {
-                        "description": "product",
+                        "description": "Product to add",
                         "name": "product",
                         "in": "body",
                         "required": true,
@@ -53,8 +55,79 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/{id}": {
+            "put": {
+                "description": "Updates an existing product in the list",
+                "summary": "Updates a product",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Product data to update",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/data.Product"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a product from the list by its ID",
+                "summary": "Deletes a product",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid ID",
                         "schema": {
                             "type": "string"
                         }

@@ -34,6 +34,7 @@ info:
 paths:
   /:
     get:
+      description: Returns a list of all products
       responses:
         "200":
           description: List of all products
@@ -45,8 +46,9 @@ paths:
             type: string
       summary: Lists all products
     post:
+      description: Adds a new product to the list
       parameters:
-      - description: product
+      - description: Product to add
         in: body
         name: product
         required: true
@@ -57,9 +59,56 @@ paths:
           description: Successfully added product
           schema:
             type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Adds a product
+  /{id}:
+    delete:
+      description: Deletes a product from the list by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request - Invalid ID
+          schema:
+            type: string
+      summary: Deletes a product
+    put:
+      description: Updates an existing product in the list
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product data to update
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/data.Product'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Product not found
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
-      summary: Adds a product
+      summary: Updates a product
 swagger: "2.0"

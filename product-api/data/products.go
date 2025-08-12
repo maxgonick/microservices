@@ -121,3 +121,7 @@ func DeleteProduct(id int) error {
 	
 	return nil
 }
+
+func ResetProducts() {
+	productList = []*Product{}
+}
