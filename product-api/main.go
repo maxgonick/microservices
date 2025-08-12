@@ -9,18 +9,32 @@ import (
 	"product-api/handlers"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
 
 	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
 	productHandler := handlers.NewProductsHandler(logger)
-	sm := http.NewServeMux()
-	sm.Handle("/", productHandler)
+
+	// ROUTING
+
+	router := mux.NewRouter()
+
+	getRouter := router.Methods("GET").Subrouter()
+	getRouter.HandleFunc("/", productHandler.GetProducts)
+
+	putRouter := router.Methods("PUT").Subrouter()
+	putRouter.Use(productHandler.MiddlewareProductValidation)
+	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
+
+	postRouter := router.Methods("POST").Subrouter()
+	postRouter.HandleFunc("/", productHandler.AddProduct)
 
 	s := &http.Server{
 		Addr:         ":8080",
-		Handler:      sm,
+		Handler:      router,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
@@ -42,7 +56,7 @@ func main() {
 
 	logger.Println("Received signal:", sig)
 
-	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	s.Shutdown(tc)
+	s.Shutdown(ctx)
 }

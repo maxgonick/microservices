@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"product-api/data"
-	"regexp"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type ProductsHandler struct {
@@ -16,48 +18,7 @@ func NewProductsHandler(l *log.Logger) *ProductsHandler {
 	return &ProductsHandler{logger: l}
 }
 
-func (p *ProductsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		p.getProducts(w, r)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		p.addProduct(w, r)
-		return
-	}
-
-	if r.Method == http.MethodPut {
-		// Expect ID in the URI
-		
-		regex := regexp.MustCompile(`/([0-9]+)`)
-
-		foundMatches := regex.FindAllStringSubmatch(r.URL.Path, -1)
-
-		if len(foundMatches) != 1 {
-			http.Error(w, "Invalid URI more than one id present", http.StatusBadRequest)
-			return
-		}
-
-		idString := foundMatches[0][1]
-		id, err := strconv.Atoi(idString)
-
-		if err != nil {
-			http.Error(w, "Invalid URI bad id", http.StatusBadRequest)
-		}
-
-		p.logger.Println("ID: ", id)
-
-		p.updateProduct(id, w, r)
-
-	}
-
-
-	w.WriteHeader(http.StatusMethodNotAllowed)
-
-}
-
-func (p *ProductsHandler) getProducts(w http.ResponseWriter, r *http.Request) {
+func (p *ProductsHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle GET Request")
 
 	productList := data.GetProducts()
@@ -68,7 +29,7 @@ func (p *ProductsHandler) getProducts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (p *ProductsHandler) addProduct(w http.ResponseWriter, r *http.Request) {
+func (p *ProductsHandler) AddProduct(w http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle POST Request")
 
 	prod := &data.Product{}
@@ -80,17 +41,25 @@ func (p *ProductsHandler) addProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (p *ProductsHandler) updateProduct(id int, w http.ResponseWriter, r *http.Request){
+func (p *ProductsHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	p.logger.Println("Handle PUT Request")
 
-	prod := &data.Product{}
+	vars := mux.Vars(r)
 
-	err :=	prod.FromJSON(r.Body)
+	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		http.Error(w, "Unable to decode request body", http.StatusBadRequest)
+		http.Error(w, "Bad URI", http.StatusBadRequest)
 		return
 	}
+
+	prod, ok := r.Context().Value(productKey{}).(*data.Product)
+
+	if !ok {
+		p.logger.Println("Error: ", ok)
+		http.Error(w, "Error retrieving product", http.StatusInternalServerError)
+	}
+
 
 	err = data.UpdateProduct(id, prod)
 
@@ -103,6 +72,27 @@ func (p *ProductsHandler) updateProduct(id int, w http.ResponseWriter, r *http.R
 		http.Error(w, "Error handling request", http.StatusInternalServerError)
 		return
 	}
+}
 
+type productKey struct{}
 
+func (p *ProductsHandler) MiddlewareProductValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		prod := &data.Product{}
+
+		err := prod.FromJSON(r.Body)
+
+		if err != nil {
+			p.logger.Println("Error decoding body: ", err)
+			http.Error(w, "Unable to decode request body", http.StatusBadRequest)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), productKey{}, prod)
+
+		r = r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+
+	})
 }
